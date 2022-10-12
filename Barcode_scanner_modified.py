@@ -8,15 +8,15 @@ from pyzbar import pyzbar
 '''url = "http://192.168.43.1:8080/video"    # uncomment when using phone camera through wifi
 cap = cv2.VideoCapture(url)'''  
 cap = cv2.VideoCapture(0)                   # use in built camera instead
-lastbarcode = 0
+# cap.set(cv2.CAP_PROP_AUTOFOCUS, 0) # turn the autofocus off
 
+lastbarcode =0
 while True:
-
    
 # setup display specs 
     ret, frame = cap.read()
     # frame = cv2.resize(frame, (0,0),fx = 0.50,fy=0.50)
-    frame = cv2.resize(frame, (0,0),fx = 1,fy=1)
+    frame = cv2.resize(frame, (0,0),fx = 1.5,fy=1.5)
     
 # show instruction to close
     cv2.putText(frame,"Q to exit",(10,10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,255,100),1)
@@ -28,7 +28,7 @@ while True:
     # print(barcode)
     for barcode in barcodes:
         (x,y,w,h) = barcode.rect
-        cv2.rectangle(frame,(x,y),(x+w,y+h),(0,0,255),1)
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),1)
         barcodeData = barcode.data.decode('utf=8')
         barcodeType = barcode.type
         text = "Barcode: {}\n Type: {}".format(barcodeData,barcodeType)
@@ -37,7 +37,7 @@ while True:
         # barcode filter
         isEqualLastBarcode = lastbarcode != barcodeData
         contain_symbols = '?' in barcodeData 
-        if (isEqualLastBarcode & ~contain_symbols ):
+        if (isEqualLastBarcode  ):
             print(barcodeData)
             lastbarcode = barcodeData
         # cv2.putText(frame,text,(x,y-10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255),1)
