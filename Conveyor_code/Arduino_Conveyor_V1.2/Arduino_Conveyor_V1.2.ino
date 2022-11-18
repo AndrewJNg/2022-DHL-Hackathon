@@ -18,7 +18,13 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <Servo.h>
+Servo swingArm;  // create servo object to control a servo
+# define servoPin  18
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int pos_light[totalStationsNum]; // hold box position info
 unsigned long last_RGB_delay = 0;
 
@@ -26,6 +32,7 @@ void setup() {
   pixels.begin();
   pixels.clear();
 
+  swingArm.attach(servoPin);  // attaches the servo on pin 13 to the servo object
   for (int i = 0; i < totalStationsNum; i++)
   {
     pos_light[i] = -1; //empty place
@@ -50,6 +57,9 @@ void loop() {
 //    Serial.println(val);
 //  }
 
+
+
+
   //  unsigned long RGB_cycle_time = 1000;
   unsigned long RGB_cycle_time = (RGB_distance * 1000) / conveyor_Speed ; // cycle time in ms
 
@@ -73,6 +83,20 @@ void loop() {
     last_RGB_delay = millis();
     DisplayRGB();
     digitalWrite(2, pixels.canShow());
+    
+    // servo control
+    if(val<0)
+    {
+      swingArm.write(0);
+    }
+    else if(val>0)
+    {
+      swingArm.write(180);
+    }
+    else
+    {
+      swingArm.write(90);
+    }
   }
 
 }
@@ -123,7 +147,7 @@ int Serial_signal_retriever()
     Serial.println(Data[0]);
     Serial.println(Position_from_string(Data));
 
-    val = Position_from_string(Data);
+    val = Position_from_string(Data)+1;
     switch (Data[0]) {
       case 'L':
         val = -val;
