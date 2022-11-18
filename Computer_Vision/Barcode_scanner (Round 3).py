@@ -19,6 +19,7 @@ cap = cv2.VideoCapture(0)
 # strategy
 # 1) use multiple angle views
 # 2) use adaptive contrast to make image easier to see
+# 3) greyscalling the image, make it easier for the software to detect barcodes
 
 def loop():
     lastbarcode =0
@@ -43,36 +44,50 @@ def loop():
         
         center = (w // 2, h // 2)
 
-        # for i in range(4):
-        #     print (i)
+        for i in range(4):
+            rotate_angle = i*45  #(0 45 90 135)
+            
+            matrix = cv2.getRotationMatrix2D(center, rotate_angle, 1.0) 
+            rotated_frame = cv2.warpAffine(frame, matrix, (w, h))
+            # cv2.imshow(str(rotate_angle),rotated_frame)
 
-        # rotate 45 degree
-        matrix = cv2.getRotationMatrix2D(center, 45, 1.0) 
-        frame_45 = cv2.warpAffine(frame, matrix, (w, h))
-        cv2.imshow("45",frame_45)
+            barcodeData = search_barcode(frame)
+            if(barcodeData!= None):
+                
+                # barcode filter
+                isEqualLastBarcode = lastbarcode != barcodeData
+                if (isEqualLastBarcode):
+                    print(barcodeData)
+                    lastbarcode = barcodeData
+                # cv2.putText(frame,text,(x,y-10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255),1)
 
-        # rotate 90 degree
-        matrix = cv2.getRotationMatrix2D(center, 90, 1.0) 
-        frame_90 = cv2.warpAffine(frame, matrix, (w, h))
-        cv2.imshow("90",frame_90)
+        # # rotate 45 degree
+        # matrix = cv2.getRotationMatrix2D(center, 45, 1.0) 
+        # frame_45 = cv2.warpAffine(frame, matrix, (w, h))
+        # cv2.imshow("45",frame_45)
+
+        # # rotate 90 degree
+        # matrix = cv2.getRotationMatrix2D(center, 90, 1.0) 
+        # frame_90 = cv2.warpAffine(frame, matrix, (w, h))
+        # cv2.imshow("90",frame_90)
         
-        # rotate 135 degree
-        matrix = cv2.getRotationMatrix2D(center, 135, 1.0) 
-        frame_135 = cv2.warpAffine(frame, matrix, (w, h))
-        cv2.imshow("135",frame_135)
+        # # rotate 135 degree
+        # matrix = cv2.getRotationMatrix2D(center, 135, 1.0) 
+        # frame_135 = cv2.warpAffine(frame, matrix, (w, h))
+        # cv2.imshow("135",frame_135)
 
-        # search image for barcode
-        barcodeData = search_barcode(frame)
-        print(barcodeData)
+        # # search image for barcode
+        # barcodeData = search_barcode(frame)
+        # print(barcodeData)
 
-        barcodeData = search_barcode(frame_45)
-        print(barcodeData)
+        # barcodeData = search_barcode(frame_45)
+        # print(barcodeData)
 
-        barcodeData = search_barcode(frame_90)
-        print(barcodeData)
+        # barcodeData = search_barcode(frame_90)
+        # print(barcodeData)
 
-        barcodeData = search_barcode(frame_135)
-        print(barcodeData)
+        # barcodeData = search_barcode(frame_135)
+        # print(barcodeData)
 
         # if(barcodeData!= None):
             
