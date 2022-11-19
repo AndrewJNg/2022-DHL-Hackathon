@@ -5,5 +5,5 @@ setup steps
 1) install python 3.10.8
 2) install opencv2  (image processing library)  using "pip install opencv-python"
 3) install pyzbar   (for barcode recognition)   using "pip install pyzbar"
-
+4) install pyserial (communicate between arduino and raspi) using "pip install pyserial"
 

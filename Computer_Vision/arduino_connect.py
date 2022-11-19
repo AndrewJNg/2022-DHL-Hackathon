@@ -4,8 +4,8 @@ import time
 # https://roboticsbackend.com/raspberry-pi-arduino-serial-communication/
 
 if __name__ == '__main__':
-    # ser = serial.Serial('/dev/ttyACM0',19200,timeout=0.1)
-    ser = serial.Serial('COM5',115200,timeout=1)
+    ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0.1)
+    # ser = serial.Serial('COM5',115200,timeout=1)
     ser.reset_input_buffer()
 
 
