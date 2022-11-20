@@ -6,6 +6,8 @@ import cv2
 from pyzbar import pyzbar
 import numpy as np
 
+import serial
+import time
 
 # option to use phone camera over the internet
 '''url = "http://192.168.43.1:8080/video"    # uncomment when using phone camera through wifi
@@ -20,6 +22,19 @@ cap = cv2.VideoCapture(0)
 # 1) use multiple angle views
 # 2) use adaptive contrast to make image easier to see
 # 3) greyscalling the image, make it easier for the software to detect barcodes
+
+package_selected_station = {
+  "A-0010-Z": "R_8",
+  "A-0020-Z": "L_9",
+  "A-0030-Z": "R_10",
+  "A-0040-Z": "R_1",
+  "A-0050-Z": "R_10",
+  "A-0060-Z": "L_3",
+  "A-0070-Z": "R_7",
+  "A-0080-Z": "L_6",
+  "A-0090-Z": "L_1",
+}
+
 
 def loop():
     lastbarcode =0
@@ -59,6 +74,13 @@ def loop():
                 if (isEqualLastBarcode):
                     print(barcodeData)
                     lastbarcode = barcodeData
+
+                    if barcodeData in package_selected_station:
+                        station_location = package_selected_station[barcodeData]
+                        print(station_location)
+                        ser.write(station_location.encode('Ascii'))
+                    else:
+                        print("error")
                 # cv2.putText(frame,text,(x,y-10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255),1)
 
         # # rotate 45 degree
@@ -101,11 +123,24 @@ def loop():
 
         # show image
         
-        
         # exit when q is pressed
         # cv2.waitKey(1)
         if cv2.waitKey(1) == ord('q'):
             break
+
+
+
+        
+        
+
+
+
+
+
+
+
+
+
 
     cap.release()
     cv2.destroyAllWindows
@@ -126,6 +161,10 @@ def search_barcode(frame):
 
 
 
+if __name__ == '__main__':
+    ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0.1)
+    # ser = serial.Serial('COM5',115200,timeout=1)
+    ser.reset_input_buffer()
 loop()
 
 

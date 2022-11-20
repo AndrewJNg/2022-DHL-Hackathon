@@ -36,11 +36,11 @@ def loop():
         h, w = frame.shape[:2]
 
         # show instruction to close
-        # cv2.putText(frame,"Press q to exit",(30,30),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),1)
+        cv2.putText(frame,"Press q to exit",(30,30),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),1)
 
 
         # display current camera view
-        # cv2.imshow("Barcode Scanner",frame)
+        cv2.imshow("Barcode Scanner",frame)
         
         center = (w // 2, h // 2)
 
