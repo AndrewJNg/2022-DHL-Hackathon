@@ -12,8 +12,8 @@ double RGB_distance = 100 / 3; // 33.3mm distance between each RGB module (mm)
 // NeoPixel library
 #include <Adafruit_NeoPixel.h>
 
-#define RGB_left_PIN        19
-#define RGB_right_PIN        1
+#define RGB_left_PIN        32
+#define RGB_right_PIN       33
 #define NUMPIXELS totalStationsNum
 
 Adafruit_NeoPixel left_RGB_Lane(NUMPIXELS, RGB_left_PIN , NEO_GRB + NEO_KHZ800);
@@ -36,6 +36,10 @@ Servo swingArm;  // create servo object to control a servo
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int pos_light[totalStationsNum][laneNum]; // hold box position info       {-1 for empty space, 0-9 for positions, from 1-10 (station number) }
 unsigned long last_RGB_delay = 0;
+
+unsigned long lastSwingArmTime = 0;
+bool SwingArmBlock = 0;
+
 
 void setup() {
   left_RGB_Lane.begin();
@@ -107,22 +111,56 @@ void loop() {
     DisplayRGB();
     digitalWrite(2, left_RGB_Lane.canShow());
 
+    //    // servo control
+    //    if (serial_input != 0)
+    //    {
+    //      lastSwingArmTime = millis();
+    //    }
+
     // servo control
     if (serial_input < 0)
     {
-      swingArm.write(0);
+      lastSwingArmTime = millis();
+      //      swingArm.write(90);
+      SwingArmBlock = 0;
     }
     else if (serial_input > 0)
     {
-      swingArm.write(180);
+      lastSwingArmTime = millis();
+      //      swingArm.write(0);
+      SwingArmBlock = 1;
+    }
+    else
+    {
+      lastSwingArmTime = millis();
+      //      swingArm.write(90);
+      SwingArmBlock = 0;
+    }
+  }
+  servo_arm();
+}
+
+
+void servo_arm()
+{
+  if ((lastSwingArmTime - millis()) <= 4000)
+  {
+    if (SwingArmBlock == 1)
+    {
+      swingArm.write(0);
     }
     else
     {
       swingArm.write(90);
     }
   }
-}
+  else
+  {
+    swingArm.write(90);
+  }
 
+
+}
 
 
 void DisplayRGB()

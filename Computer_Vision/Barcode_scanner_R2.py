@@ -40,10 +40,13 @@ while True:
         if (isEqualLastBarcode  ):
             print(barcodeData)
             lastbarcode = barcodeData
+        
+        print(barcodeData)   
+        print("  ")   
         # cv2.putText(frame,text,(x,y-10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255),1)
 
 # display
-    # cv2.imshow("Barcode Scanner",frame)
+    cv2.imshow("Barcode Scanner",frame)
 
     
     # exit when q is pressed

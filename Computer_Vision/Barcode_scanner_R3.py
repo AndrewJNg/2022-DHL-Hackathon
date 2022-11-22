@@ -44,17 +44,17 @@ def loop():
         
         center = (w // 2, h // 2)
 
-        for i in range(4):
-            rotate_angle = i*45  #(0 45 90 135)
+        for i in range(6):
+            rotate_angle = i*15  #(0 30 60 90 120 150 180)
             
             matrix = cv2.getRotationMatrix2D(center, rotate_angle, 1.0) 
             rotated_frame = cv2.warpAffine(frame, matrix, (w, h))
-            # cv2.imshow(str(rotate_angle),rotated_frame)
+            cv2.imshow(str(rotate_angle),rotated_frame)
 
-            barcodeData = search_barcode(frame)
+            barcodeData = search_barcode(rotated_frame)
             if(barcodeData!= None):
                 
-                # barcode filter
+                # barcode filte
                 isEqualLastBarcode = lastbarcode != barcodeData
                 if (isEqualLastBarcode):
                     print(barcodeData)

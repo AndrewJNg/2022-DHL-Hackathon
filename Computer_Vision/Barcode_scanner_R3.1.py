@@ -24,9 +24,9 @@ cap = cv2.VideoCapture(0)
 # 3) greyscalling the image, make it easier for the software to detect barcodes
 
 package_selected_station = {
-  "A-0010-Z": "R_8",
-  "A-0020-Z": "L_9",
-  "A-0030-Z": "R_10",
+  "A-0010-Z": "R_4",
+  "A-0020-Z": "L_5",
+  "A-0030-Z": "R_2",
   "A-0040-Z": "R_1",
   "A-0050-Z": "R_10",
   "A-0060-Z": "L_3",
@@ -59,7 +59,7 @@ def loop():
         
         center = (w // 2, h // 2)
 
-        for i in range(4):
+        for i in range(6):
             rotate_angle = i*45  #(0 45 90 135)
             
             matrix = cv2.getRotationMatrix2D(center, rotate_angle, 1.0) 
@@ -162,8 +162,8 @@ def search_barcode(frame):
 
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0.1)
-    # ser = serial.Serial('COM5',115200,timeout=1)
+    # ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0.1)
+    ser = serial.Serial('COM5',115200,timeout=1)
     ser.reset_input_buffer()
 loop()
 
