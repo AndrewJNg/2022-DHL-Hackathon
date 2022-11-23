@@ -3,10 +3,10 @@
 #define totalStationsNum 9 // 10 stations on each side
 #define laneNum 2 // 2 lanes for package collection
 
-double conveyor_Speed = 800/13.3;  // 80mm in 13.3sec
+double conveyor_Speed = 800 / 13.3; // 80mm in 13.3sec
 
 double servoDistance  = 80;  //80 mm from the center of the camera to the swing Arm
-double RGB_strip_distance  = 420+7;  //420 mm from the camera to the RGB strips
+double RGB_strip_distance  = 420 + 15; //420 mm from the camera to the RGB strips
 
 double RGB_module_distance = 100 / 3; // 33.3mm distance between each RGB module (mm)
 
@@ -38,8 +38,8 @@ Servo swingArm;  // create servo object to control a servo
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int pos_light[totalStationsNum][laneNum]; // hold box position info       {-1 for empty space, 0-9 for positions, from 1-10 (station number) }
 
-int incoming_package_destination;
-unsigned long incoming_package_time;
+int incoming_package_destination[10];       // 0 is the latest, higher number are older records
+unsigned long incoming_package_time[10];
 
 unsigned long last_RGB_delay = 0;
 
@@ -81,27 +81,30 @@ void setup() {
   swingArm.write(0);
 }
 
+int packageCount = 0;
 void loop() {
 
   int serial_input = Serial_signal_retriever();
 
-  if (serial_input > 0)      //right lane
+  if (serial_input != 0)
   {
-    incoming_package_destination = serial_input;
-    incoming_package_time = millis();
+    for (int i = 10 - 2; i >= 0; i--)
+    {
+      //shift data back by 1
+      incoming_package_destination[i + 1] = incoming_package_destination[i];
+      incoming_package_time[i + 1] = incoming_package_time[i];
+    }
+    incoming_package_destination[0] = serial_input;
+    incoming_package_time[0] = millis();
+    packageCount++;
+    Serial.print("package_location: ");
+    Serial.println(incoming_package_destination[0]);
+//    Serial.println(packageCount);
   }
-  else if (serial_input < 0)  //left lane
-  {
-    incoming_package_destination = serial_input;
-    incoming_package_time = millis();
-  }
 
 
 
-
-  //  Serial.println(incoming_package_time);
-  //  Serial.println((millis() - incoming_package_time));
-  // rotate RGB strip down the line
+  // rotate RGB module down the line
   unsigned long RGB_cycle_time = (RGB_module_distance * 1000) / conveyor_Speed ; // cycle time in ms
   if ((millis() - last_RGB_delay) >= RGB_cycle_time )
   {
@@ -112,21 +115,25 @@ void loop() {
 
 
     unsigned long rgb_activate_time = ((RGB_strip_distance * 1000) / conveyor_Speed) - 1000 ; // activation time in ms
-    if ((millis() - incoming_package_time) >= rgb_activate_time)
+    if ((millis()  - incoming_package_time[packageCount - 1]) >= rgb_activate_time)
     {
       //      Serial.println("S1");
       // decide next input from serial input
-      if (incoming_package_destination != 0)
+      if (incoming_package_destination[packageCount - 1] != 0)
       {
-        if (incoming_package_destination > 0)      //right lane
+        if (incoming_package_destination[packageCount - 1] > 0)      //right lane
         {
-          pos_light[0][1] = abs(incoming_package_destination) - 2;
-          incoming_package_destination = 0;
+          pos_light[0][1] = abs(incoming_package_destination[packageCount - 1]) - 2;
+          incoming_package_destination[packageCount - 1] = 0;
+          packageCount--;
+          Serial.println(packageCount);
         }
-        else if (incoming_package_destination < 0)  //left lane
+        else if (incoming_package_destination[packageCount - 1] < 0)  //left lane
         {
-          pos_light[0][0] = abs(incoming_package_destination) - 2;
-          incoming_package_destination = 0;
+          pos_light[0][0] = abs(incoming_package_destination[packageCount - 1]) - 2;
+          incoming_package_destination[packageCount - 1] = 0;
+          packageCount--;
+          Serial.println(packageCount);
         }
       }
       else
@@ -141,32 +148,17 @@ void loop() {
       pos_light[0][1] = -1;
     }
 
-
-    //    Serial.println("S2");
-
-
-    digitalWrite(2, left_RGB_Lane.canShow());
-    DisplayRGB();
-    digitalWrite(2, left_RGB_Lane.canShow());
-
-    //    // servo control
-    //    if (serial_input != 0)
-    //    {
-    //      lastSwingArmTime = millis();
-    //    }
-
     // servo control
-
     unsigned long servo_activate_time = ((servoDistance  * 1000) / conveyor_Speed) ; // servo activation time in ms
-    if (((millis() - incoming_package_time) >= 0  ) && ((millis() - incoming_package_time) <= (servo_activate_time + 3000) ))
+    if (((millis() - incoming_package_time[0]) >= 0  ) && ((millis() - incoming_package_time[0]) <= (servo_activate_time + 3000) ))
     {
-      if (incoming_package_destination < 0)
+      if (incoming_package_destination[0] < 0)
       {
         //      lastSwingArmTime = millis();
         swingArm.write(0);
         //      SwingArmBlock = 0;
       }
-      else if (incoming_package_destination > 0)
+      else if (incoming_package_destination[0] > 0)
       {
         //      lastSwingArmTime = millis();
         swingArm.write(90);
@@ -179,36 +171,19 @@ void loop() {
         //      SwingArmBlock = 0;
       }
     }
+
+
+
+    digitalWrite(2, left_RGB_Lane.canShow());
+    DisplayRGB();
+    digitalWrite(2, left_RGB_Lane.canShow());
+
   }
-  //servo_arm();
 }
-
-
-//void servo_arm()
-//{
-//  if ((lastSwingArmTime - millis()) <= 4000)
-//  {
-//    if (SwingArmBlock == 1)
-//    {
-//      swingArm.write(0);
-//    }
-//    else
-//    {
-//      swingArm.write(90);
-//    }
-//  }
-//  else
-//  {
-//    swingArm.write(90);
-//  }
-//
-//
-//}
 
 
 void DisplayRGB()
 {
-
   int j = 0;
   for (int station = 0; station < totalStationsNum; station++)
   {

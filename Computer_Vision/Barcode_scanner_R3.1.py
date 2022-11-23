@@ -25,7 +25,7 @@ cap = cv2.VideoCapture(0)
 
 package_selected_station = {
   "A-0010-Z": "L_4",
-  "A-0020-Z": "L_5",
+  "A-0020-Z": "R_5",
   "A-0030-Z": "R_2",
   "A-0040-Z": "R_1",
   "A-0050-Z": "R_9",
@@ -72,12 +72,12 @@ def loop():
                 # barcode filter
                 isEqualLastBarcode = lastbarcode != barcodeData
                 if (isEqualLastBarcode):
-                    print(barcodeData)
+                    # print(barcodeData)
                     lastbarcode = barcodeData
 
                     if barcodeData in package_selected_station:
                         station_location = package_selected_station[barcodeData]
-                        print(station_location)
+                        print(station_location + " barcode: " + barcodeData)
                         ser.write(station_location.encode('Ascii'))
                     else:
                         print("error")
