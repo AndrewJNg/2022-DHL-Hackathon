@@ -5,8 +5,8 @@
 
 double conveyor_Speed = 800/13.3;  // 80mm in 13.3sec
 
-double servoDistance  = 80;  //80 mm from the center of the camera to the swing Arm
-double RGB_strip_distance  = 420+7;  //420 mm from the camera to the RGB strips
+double servoDistance  = 80-7;  //80 mm from the center of the camera to the swing Arm
+double RGB_strip_distance  = 420+7-7;  //420 mm from the camera to the RGB strips
 
 double RGB_module_distance = 100 / 3; // 33.3mm distance between each RGB module (mm)
 

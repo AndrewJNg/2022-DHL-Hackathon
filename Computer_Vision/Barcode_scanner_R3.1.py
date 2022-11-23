@@ -60,7 +60,7 @@ def loop():
         center = (w // 2, h // 2)
 
         for i in range(6):
-            rotate_angle = i*45  #(0 45 90 135)
+            rotate_angle = i*15  #(0 45 90 135)
             
             matrix = cv2.getRotationMatrix2D(center, rotate_angle, 1.0) 
             rotated_frame = cv2.warpAffine(frame, matrix, (w, h))
