@@ -1,12 +1,14 @@
 
 // 2 sides for each conveyor, L_16, R_16_error
-#define totalStationsNum 10 // 10 stations on each side
+#define totalStationsNum 9 // 10 stations on each side
 #define laneNum 2 // 2 lanes for package collection
 
 double conveyor_Speed = 100;  // 10mm/sec
+
+double servoDistance  = 100;  //100 mm from the camera to the swing Arm
+double RGBDistance  = 420;  //420 mm from the camera to the RGB strips
+
 double RGB_distance = 100 / 3; // 33.3mm distance between each RGB module (mm)
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // NeoPixel library
@@ -35,6 +37,10 @@ Servo swingArm;  // create servo object to control a servo
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int pos_light[totalStationsNum][laneNum]; // hold box position info       {-1 for empty space, 0-9 for positions, from 1-10 (station number) }
+
+int incoming_package_destination;
+unsigned long incoming_package_time;
+
 unsigned long last_RGB_delay = 0;
 
 unsigned long lastSwingArmTime = 0;
@@ -50,12 +56,13 @@ void setup() {
 
   swingArm.attach(servoPin);  // attaches servo pin
 
-  // set all to 0
+  // set all to -1 for empty space
   for (int i = 0; i < totalStationsNum; i++)
     for (int j = 0; j < laneNum; j++)
       pos_light[i][j] = -1; //empty place
 
-  pos_light[0][0] = 5 - 1; //set test as station 5 and 8 place
+  //set test as station 5 and 8 place
+  pos_light[0][0] = 5 - 1;
   pos_light[0][1] = 8 - 1;
 
   left_RGB_Lane.show();
@@ -71,33 +78,56 @@ void setup() {
 }
 
 void loop() {
-  int serial_input = Serial_signal_retriever();
 
-  //  unsigned long RGB_cycle_time = 1000;
+  int serial_input = Serial_signal_retriever();
   unsigned long RGB_cycle_time = (RGB_distance * 1000) / conveyor_Speed ; // cycle time in ms
 
-  //  Serial.println('1');
+  if (serial_input < 0)      //right lane
+  {
+    incoming_package_destination = serial_input;
+    incoming_package_time = millis();
+  }
+  else if (serial_input > 0)  //left lane
+  {
+    incoming_package_destination = serial_input;
+    incoming_package_time = millis();
+  }
+
+
+
+
+  //  Serial.println(incoming_package_time);
+  //  Serial.println((millis() - incoming_package_time));
+  // rotate RGB strip down the line
   if ((millis() - last_RGB_delay) >= RGB_cycle_time )
   {
+    last_RGB_delay = millis();
     for (int j = 0; j < laneNum; j++)
-    {
       for (int i = totalStationsNum - 2; i >= 0; i--)
-      {
         pos_light[i + 1][j] = pos_light[i][j];
-      }
-    }
 
 
-    // decide next input from serial input
-    if (serial_input != 0)
+    if ((millis() - incoming_package_time) >= 3000)
     {
-      if (serial_input < 0)      //right lane
+      //      Serial.println("S1");
+      // decide next input from serial input
+      if (incoming_package_destination != 0)
       {
-        pos_light[0][1] = abs(serial_input) - 2;
+        if (incoming_package_destination < 0)      //right lane
+        {
+          pos_light[0][1] = abs(incoming_package_destination) - 2;
+          incoming_package_destination = 0;
+        }
+        else if (incoming_package_destination > 0)  //left lane
+        {
+          pos_light[0][0] = abs(incoming_package_destination) - 2;
+          incoming_package_destination = 0;
+        }
       }
-      else if (serial_input > 0)  //left lane
+      else
       {
-        pos_light[0][0] = abs(serial_input) - 2;
+        pos_light[0][0] = -1;
+        pos_light[0][1] = -1;
       }
     }
     else
@@ -106,8 +136,11 @@ void loop() {
       pos_light[0][1] = -1;
     }
 
+
+    //    Serial.println("S2");
+
+
     digitalWrite(2, left_RGB_Lane.canShow());
-    last_RGB_delay = millis();
     DisplayRGB();
     digitalWrite(2, left_RGB_Lane.canShow());
 
@@ -118,49 +151,52 @@ void loop() {
     //    }
 
     // servo control
-    if (serial_input < 0)
+    if (((millis() - incoming_package_time) <= 1500 )&((millis() - incoming_package_time) >= 1000 ))
     {
-      // lastSwingArmTime = millis();
-           swingArm.write(90);
-      // SwingArmBlock = 0;
-    }
-    else if (serial_input > 0)
-    {
-      // lastSwingArmTime = millis();
-           swingArm.write(0);
-      // SwingArmBlock = 1;
-    }
-    else
-    {
-      // lastSwingArmTime = millis();
-           swingArm.write(90);
-      // SwingArmBlock = 0;
+      if (incoming_package_destination < 0)
+      {
+        //      lastSwingArmTime = millis();
+        swingArm.write(90);
+        //      SwingArmBlock = 0;
+      }
+      else if (incoming_package_destination > 0)
+      {
+        //      lastSwingArmTime = millis();
+        swingArm.write(0);
+        //      SwingArmBlock = 1;
+      }
+      else
+      {
+        //      lastSwingArmTime = millis();
+        swingArm.write(90);
+        //      SwingArmBlock = 0;
+      }
     }
   }
-  // servo_arm();
+  //servo_arm();
 }
 
 
-// void servo_arm()
-// {
-//   if ((lastSwingArmTime - millis()) <= 4000)
-//   {
-//     if (SwingArmBlock == 1)
-//     {
-//       swingArm.write(0);
-//     }
-//     else
-//     {
-//       swingArm.write(90);
-//     }
-//   }
-//   else
-//   {
-//     swingArm.write(90);
-//   }
-
-
-// }
+//void servo_arm()
+//{
+//  if ((lastSwingArmTime - millis()) <= 4000)
+//  {
+//    if (SwingArmBlock == 1)
+//    {
+//      swingArm.write(0);
+//    }
+//    else
+//    {
+//      swingArm.write(90);
+//    }
+//  }
+//  else
+//  {
+//    swingArm.write(90);
+//  }
+//
+//
+//}
 
 
 void DisplayRGB()
