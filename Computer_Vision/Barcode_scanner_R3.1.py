@@ -24,7 +24,7 @@ cap = cv2.VideoCapture(0)
 # 3) greyscalling the image, make it easier for the software to detect barcodes
 
 package_selected_station = {
-  "A-0010-Z": "R_4",
+  "A-0010-Z": "L_4",
   "A-0020-Z": "L_5",
   "A-0030-Z": "R_2",
   "A-0040-Z": "R_1",
@@ -162,8 +162,8 @@ def search_barcode(frame):
 
 
 if __name__ == '__main__':
-    # ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0.1)
-    ser = serial.Serial('COM5',115200,timeout=1)
+    ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0.1)
+    # ser = serial.Serial('COM5',115200,timeout=1)
     ser.reset_input_buffer()
 loop()
 

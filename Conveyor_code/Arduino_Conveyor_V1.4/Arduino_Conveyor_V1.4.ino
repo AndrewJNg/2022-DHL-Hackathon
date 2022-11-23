@@ -154,7 +154,7 @@ void loop() {
     // servo control
 
     unsigned long servo_activate_time = ((servoDistance  * 1000) / conveyor_Speed) ; // servo activation time in ms
-    if (((millis() - incoming_package_time) >= (servo_activate_time - 1000)  ) && ((millis() - incoming_package_time) <= (servo_activate_time + 1000) ))
+    if (((millis() - incoming_package_time) >= (servo_activate_time - 1500)  ) && ((millis() - incoming_package_time) <= (servo_activate_time + 1500) ))
     {
       if (incoming_package_destination < 0)
       {
