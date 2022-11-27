@@ -23,9 +23,9 @@ Adafruit_NeoPixel right_RGB_Lane(NUMPIXELS, RGB_right_PIN, NEO_GRB + NEO_KHZ800)
 
 
 byte package_RGB_output[4][3] = {
-  {0, 10, 0} //green for pickup
-  , {0, 0, 10} //blue for package location
-  , {10, 0, 0} //red for error package location
+  {0, 10, 10} //green for pickup
+  , {0, 0, 0} //blue for package location
+  , {0, 0, 0} //red for error package location
   , {0, 0, 0} //black for empty
 };
 
@@ -191,11 +191,11 @@ void DisplayRGB()
 
     if (pos_equal_station)
     {
-      left_RGB_Lane.setPixelColor(station, left_RGB_Lane.Color(0, 10 , 0 ));  //green for pickup
+      left_RGB_Lane.setPixelColor(station, left_RGB_Lane.Color(200, 100 , 0 ));  //green for pickup
     }
     else if (pos_light[station][j] != -1)
     {
-      left_RGB_Lane.setPixelColor(station, left_RGB_Lane.Color(0, 0 , 10 ));  //blue for package location
+      left_RGB_Lane.setPixelColor(station, left_RGB_Lane.Color(0, 0 , 0 ));  //blue for package location
     }
     //    else if (pos_light[station][j] != -1)
     //    {
@@ -214,11 +214,11 @@ void DisplayRGB()
 
     if (pos_equal_station)
     {
-      right_RGB_Lane.setPixelColor(station, right_RGB_Lane.Color(0, 10 , 0 ));  //green for pickup
+      right_RGB_Lane.setPixelColor(station, right_RGB_Lane.Color(200, 100 , 0 ));  //green for pickup
     }
     else if (pos_light[station][j] != -1)
     {
-      right_RGB_Lane.setPixelColor(station, right_RGB_Lane.Color(0, 0 , 10 ));  //blue for package location
+      right_RGB_Lane.setPixelColor(station, right_RGB_Lane.Color(0, 0 , 0 ));  //blue for package location
     }
     //    else if (pos_light[station][j] != -1)
     //    {
